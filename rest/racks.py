@@ -21,8 +21,10 @@
 import xml.etree.ElementTree as ET
 from ClusterShell.NodeSet import NodeSet
 from settings import settings
-from ConfigParser import NoOptionError
-
+try:
+    from ConfigParser import NoOptionError
+except ModuleNotFoundError:
+    from configparser import NoOptionError
 
 class NodeType(object):
 
@@ -42,7 +44,7 @@ class Racksrow(object):
     @staticmethod
     def racksrow2dict(racksrow):
         xracks = {}
-        for name, rack in racksrow.racks.iteritems():
+        for name, rack in racksrow.racks.items():
             xracks[rack.name] = Rack.rack2dict(rack)
         return xracks
 

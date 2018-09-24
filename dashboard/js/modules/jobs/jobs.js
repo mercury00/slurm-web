@@ -103,18 +103,21 @@ define([
       closeModal();
       self.onModal = jobId;
 
-      $.ajax(config.cluster.api.url + config.cluster.api.path + '/job/' + jobId, ajaxUtils.getAjaxOptions(config.cluster))
-        .success(function(job) {
-          var context = {
-            job: job
-          };
+      var ajax_options = ajaxUtils.getAjaxOptions(config.cluster);
+      ajax_options.type = "GET";
+      ajax_options.url = config.cluster.api.url + config.cluster.api.path + '/job/' + jobId;
+      ajax_options.success = function (job) {
+                   var context = {
+                               job: job
+                       };
+                   job.id = jobId;
 
-          job.id = jobId;
+                   $('body').append(modalTemplate(context));
+                   $('#modal-job').on('hidden.bs.modal', closeModal);
+                   $('#modal-job').modal('show');
+                 };
 
-          $('body').append(modalTemplate(context));
-          $('#modal-job').on('hidden.bs.modal', closeModal);
-          $('#modal-job').modal('show');
-        });
+      $.ajax(ajax_options);
     }
 
     this.saveUI = function () {
@@ -144,8 +147,10 @@ define([
         toggleModal(options.jobId);
       });
 
-      $.ajax(config.cluster.api.url + config.cluster.api.path + '/jobs', ajaxUtils.getAjaxOptions(config.cluster))
-        .success(function(jobs) {
+      var ajax_options = ajaxUtils.getAjaxOptions(config.cluster);
+      ajax_options.type = "GET";
+      ajax_options.url = config.cluster.api.url + config.cluster.api.path + '/jobs';
+      ajax_options.success = function (jobs) {
           var context, plotParams, index, dataJobsState, job, qos, part,
             dataAllocatedCores,
             labels = [],
@@ -380,7 +385,9 @@ define([
           $('.plots').css({ 'min-height': maxLegendHeight + 'px' });
 
           self.loadUI();
-        });
+      };
+
+      $.ajax(ajax_options);
     };
 
     this.refresh = function() {
@@ -392,10 +399,6 @@ define([
         self.init();
       }, config.REFRESH);
     };
-
-    this.stopRefresh = function(){
-      clearInterval(this.interval);
-    }
 
     this.destroy = function(destroyInterval) {
       if (this.interval && destroyInterval) {

@@ -50,24 +50,30 @@ define([
 
       async.parallel({
         nodes: function(callback) {
-
-          $.ajax(config.cluster.api.url + config.cluster.api.path + '/nodes', ajaxUtils.getAjaxOptions(config.cluster))
-            .success(function(data) {
+          var ajax_options = ajaxUtils.getAjaxOptions(config.cluster);
+          ajax_options.type = "GET";
+          ajax_options.url = config.cluster.api.url + config.cluster.api.path + '/nodes';
+          ajax_options.success = function (data) {
               callback(null, data);
-            })
-            .error(function() {
+          };
+          ajax_options.error = function() {
               callback(true, null);
-            });
+          };
+
+          $.ajax(ajax_options);
         },
         racks: function(callback) {
-
-          $.ajax(config.cluster.api.url + config.cluster.api.path + '/racks', ajaxUtils.getAjaxOptions(config.cluster))
-            .success(function(data) {
+          var ajax_options =  ajaxUtils.getAjaxOptions(config.cluster);
+          ajax_options.type = "GET";
+          ajax_options.url = config.cluster.api.url + config.cluster.api.path + '/racks';
+          ajax_options.success = function (data) {
               callback(null, data);
-            })
-            .error(function() {
+          };
+          ajax_options.error = function () {
               callback(true, null);
-            });
+          };
+
+          $.ajax(ajax_options);
         }
       }, function(err, result) {
         var i, racks, rack, parsed, context;
@@ -102,8 +108,8 @@ define([
 
         $('canvas[id^="cv_rackmap_"]').parent('.canvas-container').css('width', self.config.CANVASWIDTH);
 
-        $.each(racks, function(idRack, rack) {
-          $('#cv_rackmap_' + idRack).on('mousemove', function(e) {
+        $.each(racks, function (idRack, rack) {
+          $('#cv_rackmap_' + idRack).on('mousemove', function (e) {
             var offset = $(this).offset();
 
             e.stopPropagation();
@@ -112,7 +118,12 @@ define([
 
           draw.drawRack(rack);
           $.each(rack.nodes, function(idRackNode, rackNode) {
-            draw.drawNode(rack, rackNode, self.slurmNodes[rackNode.name]);
+            if (self.slurmNodes[rackNode.name] === undefined || self.slurmNodes[rackNode.name] === null) {
+                console.log("error with node " + rackNode.name);
+            }
+            else {
+                draw.drawNode(rack, rackNode, self.slurmNodes[rackNode.name]);
+            }
           });
         });
 
@@ -124,10 +135,6 @@ define([
 
     this.refresh = function() {
       var self = this;
-
-      this.stopRefresh = function(){
-        clearInterval(this.interval);
-      }
 
       this.interval = setInterval(function() {
         self.saveUI();

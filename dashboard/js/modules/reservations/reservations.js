@@ -44,29 +44,33 @@ define([
     }
 
     this.init = function() {
-      var self = this
+      var self = this;
 
-      $.ajax(config.cluster.api.url + config.cluster.api.path + '/reservations', ajaxUtils.getAjaxOptions(config.cluster))
-        .success(function(reservations) {
-          var context = {
-            count: Object.keys(reservations).length,
-            reservations: reservations
-          };
+      var ajax_options = ajaxUtils.getAjaxOptions(config.cluster);
+      ajax_options.type = "GET";
+      ajax_options.url = config.cluster.api.url + config.cluster.api.path + '/reservations';
+      ajax_options.success = function (reservations) {
+                   var context = {
+                       count: Object.keys(reservations).length,
+                       reservations: reservations
+                       };
 
-          $('#main').append(template(context));
-          $(document).trigger('pageLoaded');
+                   $('#main').append(template(context));
+                   $(document).trigger('pageLoaded');
 
-          tablesorterUtils.eraseEmptyColumn('.tablesorter');
-          $('.tablesorter').tablesorter(self.tablesorterOptions);
+                   tablesorterUtils.eraseEmptyColumn('.tablesorter');
+                   $('.tablesorter').tablesorter(self.tablesorterOptions);
 
-          $('tr').on('click', function(e) {
-            var reservation = $($($(this).children('td'))[0]).html();
+                   $('tr').on('click', function(e) {
+                       var reservation = $($($(this).children('td'))[0]).html();
 
-            $(document).trigger('show', { page: 'jobs', filter: { type: 'reservation', value: reservation } });
-          });
+                       $(document).trigger('show', { page: 'jobs', filter: { type: 'reservation', value: reservation } });
+                   });
 
-          self.loadUI();
-        });
+                   self.loadUI();
+               };
+
+      $.ajax(ajax_options);
     };
 
     this.refresh = function() {
@@ -79,10 +83,6 @@ define([
         self.init();
       }, config.REFRESH);
     };
-
-    this.stopRefresh = function(){
-      clearInterval(this.interval);
-    }
 
     this.destroy = function() {
       if (this.interval) {

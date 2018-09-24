@@ -56,24 +56,29 @@ define([
     }
 
     function toggleModalCore(jobId) {
+      var ajax_options = ajaxUtils.getAjaxOptions(config.cluster);
+      ajax_options.type = "GET";
+      ajax_options.url = config.cluster.api.url + config.cluster.api.path + '/job/' + jobId;
 
-      $.ajax(config.cluster.api.url + config.cluster.api.path + '/job/' + jobId, ajaxUtils.getAjaxOptions(config.cluster))
-        .success(function(job) {
+      ajax_options.success = function (job) {
           var context = {
-            jobId: jobId,
-            job: job
+              jobId: jobId,
+              job: job
           };
 
           $('body').append(modalCoreTemplate(context));
           $('#modal-core').on('hidden.bs.modal', closeModalCore);
           $('#modal-core').modal('show');
-        });
+      };
+
+      $.ajax(ajax_options);
     }
 
     function toggleModalNode(nodeId) {
-
-      $.ajax(config.cluster.api.url + config.cluster.api.path + '/jobs-by-node/' + nodeId, ajaxUtils.getAjaxOptions(config.cluster))
-        .success(function(jobs) {
+      var ajax_options = ajaxUtils.getAjaxOptions(config.cluster);
+      ajax_options.type = "GET";
+      ajax_options.url = config.cluster.api.url + config.cluster.api.path + '/jobs-by-node/' + nodeId;
+      ajax_options.success = function (jobs) {
           var context;
 
           // expand the first job's informations
@@ -90,16 +95,18 @@ define([
           $('body').append(modalNodeTemplate(context));
           $('#modal-node').on('hidden.bs.modal', closeModalNode);
           $('#modal-node').modal('show');
-        });
+      };
+
+      $.ajax(ajax_options);
     }
 
-    $(document).on('modal-core', function(e, options) {
+    $(document).on('modal-core', function (e, options) {
       e.stopPropagation();
 
       toggleModalCore(options.jobId);
     });
 
-    $(document).on('modal-node', function(e, options) {
+    $(document).on('modal-node', function (e, options) {
       e.stopPropagation();
 
       toggleModalNode(options.nodeId);
@@ -113,43 +120,52 @@ define([
       $(window).scrollTop(self.scrollTop);
     }
 
-    this.init = function() {
+    this.init = function () {
       var self = this,
         allocatedCPUs = null;
 
       var options = ajaxUtils.getAjaxOptions(config.cluster);
       async.parallel({
-        jobs: function(callback) {
-
-          $.ajax(config.cluster.api.url + config.cluster.api.path + '/jobs', options)
-            .success(function(data) {
+        jobs: function (callback) {
+          var ajax_options = options;
+          ajax_options.type = "GET";
+          ajax_options.url = config.cluster.api.url + config.cluster.api.path + '/jobs';
+          ajax_options.success = function (data) {
               callback(null, data);
-            })
-            .error(function() {
+          };
+          ajax_options.error = function () {
               callback(true, null);
-            });
+          };
+
+          $.ajax(ajax_options);
         },
-        nodes: function(callback) {
-
-          $.ajax(config.cluster.api.url + config.cluster.api.path + '/nodes', options)
-            .success(function(data) {
+        nodes: function (callback) {
+          var ajax_options = options;
+          ajax_options.type = "GET";
+          ajax_options.url = config.cluster.api.url + config.cluster.api.path + '/nodes';
+          ajax_options.success = function (data) {
               callback(null, data);
-            })
-            .error(function() {
+          };
+          ajax_options.error = function () {
               callback(true, null);
-            });
+          };
+
+          $.ajax(ajax_options);
         },
-        racks: function(callback) {
-
-          $.ajax(config.cluster.api.url + config.cluster.api.path + '/racks', options)
-            .success(function(data) {
+        racks: function (callback) {
+          var ajax_options = options;
+          ajax_options.type = "GET";
+          ajax_options.url = config.cluster.api.url + config.cluster.api.path + '/racks';
+          ajax_options.success = function (data) {
               callback(null, data);
-            })
-            .error(function() {
+          };
+          ajax_options.error = function () {
               callback(true, null);
-            });
+          };
+
+          $.ajax(ajax_options);
         }
-      }, function(err, result) {
+      }, function (err, result) {
         var i, racks, rack, resultRacks, context;
 
         if (err) {
@@ -184,15 +200,15 @@ define([
         $(document).trigger('pageLoaded');
 
         $('canvas[id^="cv_rackmap_"]').parent('.canvas-container').css('width', self.config.CANVASWIDTH);
-        $.each(racks, function(idRack, rack) {
-          $('#cv_rackmap_' + idRack).on('click', function(e) {
+        $.each(racks, function (idRack, rack) {
+          $('#cv_rackmap_' + idRack).on('click', function (e) {
             var offset = $(this).offset();
 
             e.stopPropagation();
             $(document).trigger('canvas-click', { rack: idRack, x: e.pageX - offset.left, y: e.pageY - offset.top });
           });
 
-          $('#cv_rackmap_' + idRack).on('mousemove', function(e) {
+          $('#cv_rackmap_' + idRack).on('mousemove', function (e) {
             var offset = $(this).offset();
 
             e.stopPropagation();
@@ -200,7 +216,7 @@ define([
           });
 
           draw.drawRack(rack);
-          $.each(rack.nodes, function(idRacknode, rackNode) {
+          $.each(rack.nodes, function (idRacknode, rackNode) {
             draw.drawNodeCores(rack, rackNode, self.slurmNodes[rackNode.name], allocatedCPUs[rackNode.name]);
           });
         });
@@ -214,18 +230,14 @@ define([
     this.refresh = function() {
       var self = this;
 
-      this.interval = setInterval(function() {
+      this.interval = setInterval(function () {
         self.saveUI();
         $('#jobsmap').remove();
         self.init();
       }, config.REFRESH);
     };
 
-    this.stopRefresh = function(){
-      clearInterval(this.interval);
-    }
-
-    this.destroy = function() {
+    this.destroy = function () {
       if (this.interval) {
         clearInterval(this.interval);
       }

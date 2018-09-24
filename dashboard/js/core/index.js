@@ -34,6 +34,14 @@ require.config({
     'bootstrap-typeahead': '/javascript/bootstrap/js/typeahead.jquery',
     'bootstrap-tagsinput': '/javascript/bootstrap/js/bootstrap-tagsinput.min',
     d3: '/javascript/d3/d3.min',
+    'd3-scale': '/nodejs/d3-scale/build/d3-scale',
+    'd3-array': '/nodejs/d3-array/build/d3-array',
+    'd3-interpolate': '/nodejs/d3-interpolate/build/d3-interpolate',
+    'd3-format': '/nodejs/d3-format/build/d3-format',
+    'd3-time': '/nodejs/d3-time/build/d3-time',
+    'd3-time-format': '/nodejs/d3-time-format/build/d3-time-format',
+    'd3-collection': '/nodejs/d3-collection/build/d3-collection',
+    'd3-color': '/nodejs/d3-color/build/d3-color',
     'token-utils': '../../js/utils/token',
     'user-utils': '../../js/utils/user',
     'date-utils': '../../js/utils/date',
@@ -134,12 +142,12 @@ require([
   'topology',
   'ajax-utils'
 ], function($, Page, config, token, user, Login, Navbar, Clusters, Jobs, Racks, JobsMap, QOS, Partitions, Reservations, D3View, Gantt, Topology, ajaxUtils) {
-  var clusters = null,
+    var clusters = null,
     page = new Page(),
     navbar = null;
 
   config = JSON.parse(config);
-  clusters = new Clusters(config);
+  clusters = new Clusters(config); 
   clusters.init();
 
   String.prototype.capitalizeFirstLetter = function() {
@@ -251,19 +259,6 @@ require([
 
     if (page.hasOwnProperty('refresh')) {
       page.refresh();
-      if(page.hasOwnProperty('stopRefresh') && config.REFRESHCHECKBOX){
-        $("#refreshCheckboxContainer").show();
-        $("#refreshCheckbox").change(function(){
-          if(this.checked){
-            page.refresh();
-          }
-          else{
-            page.stopRefresh();
-          }
-        });
-      }else{
-        $("#refreshCheckboxContainer").hide();
-      }
     }
   });
 

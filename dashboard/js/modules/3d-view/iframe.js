@@ -54,7 +54,7 @@ require.config({
 });
 
 if (isIE) {
-  require([ 'xdomain' ], function(xdomain) { // eslint-disable-line global-require
+  require([ 'xdomain' ], function (xdomain) { // eslint-disable-line global-require
     var index, slaves = {};
 
     for (index in window.clusters) {
@@ -64,7 +64,7 @@ if (isIE) {
   });
 }
 
-function init() {
+function init () {
   require([ // eslint-disable-line global-require
     'jquery',
     'async',
@@ -81,13 +81,13 @@ function init() {
 
     config = JSON.parse(config);
 
-    function setCanvasSize(canvas) {
+    function setCanvasSize (canvas) {
       $('canvas').removeAttr('style');
       $('canvas').attr('width', canvas.width);
       $('canvas').attr('height', canvas.height);
     }
 
-    function getCanvas() {
+    function getCanvas () {
       return {
         element: $('canvas')[0],
         width: $(window).innerWidth(),
@@ -95,7 +95,7 @@ function init() {
       };
     }
 
-    function parseURL(url) {
+    function parseURL (url) {
       var parser = document.createElement('a'),
         searchObject = {},
         queries, split, i;
@@ -128,34 +128,46 @@ function init() {
     setCanvasSize(canvas);
 
     async.parallel({
-      racks: function(callback) {
-        $.ajax(config.cluster.api.url + config.cluster.api.path + '/racks', options)
-          .success(function(data) {
+      racks: function (callback) {
+        var ajax_options = options;
+        ajax_options.type = "GET";
+        ajax_options.url = config.cluster.api.url + config.cluster.api.path + '/racks';
+        ajax_options.success = function (data) {
             callback(null, data);
-          })
-          .error(function(err) {
+        };
+        ajax_options.error = function (err) {
             callback(err, null);
-          });
+        };
+
+        $.ajax(ajax_options);
       },
-      nodes: function(callback) {
-        $.ajax(config.cluster.api.url + config.cluster.api.path + '/nodes', options)
-          .success(function(data) {
+      nodes: function (callback) {
+        var ajax_options = options;
+        ajax_options.type = "GET";
+        ajax_options.url = config.cluster.api.url + config.cluster.api.path + '/nodes';
+        ajax_options.success = function (data) {
             callback(null, data);
-          })
-          .error(function(err) {
+        };
+        ajax_options.error = function (err) {
             callback(err, null);
-          });
+        };
+
+        $.ajax(ajax_options);
       },
-      jobs: function(callback) {
-        $.ajax(config.cluster.api.url + config.cluster.api.path + '/jobs', options)
-          .success(function(data) {
+      jobs: function (callback) {
+        var ajax_options = options;
+        ajax_options.type = "GET";
+        ajax_options.url = config.cluster.api.url + config.cluster.api.path + '/jobs';
+        ajax_options.success = function (data) {
             callback(null, data);
-          })
-          .error(function(err) {
+        };
+        ajax_options.error = function (err) {
             callback(err, null);
-          });
+        };
+
+        $.ajax(ajax_options);
       }
-    }, function(err, result) {
+    }, function (err, result) {
       var racks, room, nodesInfos, jobs, map, racksList, range, rack;
 
       if (err) {

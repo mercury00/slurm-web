@@ -46,9 +46,10 @@ define([
 
     this.init = function() {
       var self = this;
-
-      $.ajax(config.cluster.api.url + config.cluster.api.path + '/qos', ajaxUtils.getAjaxOptions(config.cluster))
-        .success(function(qos) {
+      var ajax_options = ajaxUtils.getAjaxOptions(config.cluster);
+      ajax_options.type = "GET";
+      ajax_options.url = config.cluster.api.url + config.cluster.api.path + '/qos';
+      ajax_options.success = function (qos) {
           var context;
 
           if (qos.error) {
@@ -78,7 +79,9 @@ define([
           });
 
           self.loadUI();
-        });
+      };
+
+      $.ajax(ajax_options);
     };
 
     this.refresh = function() {
@@ -91,10 +94,6 @@ define([
         self.init();
       }, config.REFRESH);
     };
-
-    this.stopRefresh = function(){
-      clearInterval(this.interval);
-    }
 
     this.destroy = function() {
       if (this.interval) {

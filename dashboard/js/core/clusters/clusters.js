@@ -40,22 +40,25 @@ define([
   }
 
   function retrieveClusterInformations(cluster, callback) {
+    var ajax_options = ajaxUtils.getAjaxOptions();
+    ajax_options.type = "GET";
+    ajax_options.url = cluster.api.url + cluster.api.path + '/cluster';
+    ajax_options.success = function (response) {
+                cluster.infos = response.data;
+                cluster.name = response.data.name;
+                cluster.authentication = response.authentication;
+                callback(null, null);
+               };
+    ajax_options.error = function (error) {
+                // remove unreachable cluster from list
+                clusters.splice(clusters.indexOf(cluster), 1);
 
-    $.ajax(cluster.api.url + cluster.api.path + '/cluster', ajaxUtils.getAjaxOptions())
-      .success(function(response) {
-        cluster.infos = response.data;
-        cluster.name = response.data.name;
-        cluster.authentication = response.authentication;
-        callback(null, null);
-      })
-      .error(function(error) {
-        // remove unreachable cluster from list
-        clusters.splice(clusters.indexOf(cluster), 1);
+                console.log('error on retrieveClusterInformations for cluster', cluster, error); // eslint-disable-line no-console
+                callback(null, cluster);
+               };
 
-        console.log('error on retrieveClusterInformations for cluster', cluster, error); // eslint-disable-line no-console
-        callback(null, cluster);
-      });
-  }
+      $.ajax(ajax_options);
+  };
 
   return function(config) {
     var lock = false;

@@ -45,8 +45,11 @@ define([
 
     this.init = function() {
       var self = this
-      $.ajax(config.cluster.api.url + config.cluster.api.path + '/partitions', ajaxUtils.getAjaxOptions(config.cluster))
-        .success(function(partitions) {
+
+      var ajax_options = ajaxUtils.getAjaxOptions(config.cluster);
+      ajax_options.type = "GET";
+      ajax_options.url = config.cluster.api.url + config.cluster.api.path + '/partitions';
+      ajax_options.success = function (partitions) {
           var context = {
             count: Object.keys(partitions).length,
             partitions: partitions
@@ -65,7 +68,9 @@ define([
           });
 
           self.loadUI();
-        });
+      };
+
+      $.ajax(ajax_options);
     };
 
     this.refresh = function() {
@@ -78,10 +83,6 @@ define([
         self.init();
       }, config.REFRESH);
     };
-
-    this.stopRefresh = function(){
-      clearInterval(this.interval);
-    }
 
     this.destroy = function() {
       if (this.interval) {

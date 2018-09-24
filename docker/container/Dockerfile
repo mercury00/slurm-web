@@ -36,9 +36,9 @@ CMD ["/sbin/my_init"]
 # Install locales
 RUN locale-gen en_US.UTF-8
 
-ENV BUILD_DEPS="git devscripts equivs apt-utils apache2-dev libslurm-dev python-setuptools cython python-dev libslurmdb-dev libslurm-dev ca-certificates"
+ENV BUILD_DEPS="git devscripts equivs apt-utils apache2-dev libslurm-dev python3-setuptools cython3 python3-dev libslurmdb-dev libslurm-dev ca-certificates"
 
-ENV RUN_DEPS="apache2 libapache2-mod-wsgi javascript-common python-flask clustershell libjs-bootstrap libjs-jquery-flot libjs-jquery-tablesorter munge slurm-llnl node-uglify fonts-dejavu-core python-ldap python-redis libjs-requirejs libjs-requirejs-text libjs-three libjs-d3 libjs-handlebars"
+ENV RUN_DEPS="apache2 libapache2-mod-wsgi-py3 javascript-common python3-flask clustershell libjs-bootstrap libjs-jquery-flot libjs-jquery-tablesorter munge slurm-llnl node-uglify fonts-dejavu-core python3-ldap python3-redis libjs-requirejs libjs-requirejs-text libjs-three libjs-d3 libjs-handlebars"
 
 # Enable universe and multiverse
 #RUN cat /etc/apt/sources.list && \
@@ -54,17 +54,15 @@ RUN a2enmod wsgi && \
     a2enconf javascript-common
 
 # Build and install specific deps
-ENV SLURM_VER=15.08.2
+ENV SLURM_VER=17.11.09
 RUN cd /usr/src && \
-    git clone https://github.com/PySlurm/pyslurm.git && \
+    git clone https://github.com/mercury00/pyslurm.git && \
     cd pyslurm && \
-    git checkout remotes/origin/$SLURM_VER && \
-    sed -i 's/__max_slurm_hex_version__ = "0x0f0803"/__max_slurm_hex_version__ = "0x0f0807"/' setup.py && \
-    tar cvfj ../python-pyslurm_$SLURM_VER.orig.tar.bz2 --exclude .git . && \
+    tar cvfj ../python3-pyslurm_$SLURM_VER.orig.tar.bz2 --exclude .git . && \
     mk-build-deps -ri -t "apt-get -y --no-install-recommends" && \
     dch -v $SLURM_VER-1 -D testing "New upstream release" && \
     debuild -us -uc && \
-    dpkg -i ../python-pyslurm_$SLURM_VER-1_amd64.deb
+    dpkg -i ../python3-pyslurm_$SLURM_VER-1_amd64.deb
 
 RUN cd /usr/src && \
     git clone https://github.com/edf-hpc/opentypejs.git && \
@@ -93,9 +91,8 @@ RUN cd /usr/src && \
 
 
 RUN cd /usr/src && \
-    git clone https://github.com/edf-hpc/slurm-web.git && \
+    git clone https://github.com/mercury00/slurm-web.git && \
     cd slurm-web && \
-    git checkout debian/2.0.0 && \
     debuild -us -uc && \
     dpkg -i ../slurm-web-*deb
 

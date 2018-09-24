@@ -253,8 +253,9 @@ define([
   }
 
   function showJobsByNodes(options, config) {
-    $.ajax(config.cluster.api.url + config.cluster.api.path + '/jobs-by-nodes', options)
-      .success(function(jobsByNodes) {
+    var ajax_options = options;
+    ajax_options.url = config.cluster.api.url + config.cluster.api.path + '/jobs-by-nodes';
+    ajax_options.success = function (jobsByNodes) {
         var context = {
           jobs: computeJobsForNodes(jobsByNodes)
         };
@@ -262,12 +263,16 @@ define([
         $('#nodes').append(nodesTemplate(context));
 
         bindUtils(context.jobs, options);
-      });
+    };
+
+    $.ajax(ajax_options);
   }
 
   function showJobsByQos(options, config) {
-    $.ajax(config.cluster.api.url + config.cluster.api.path + '/jobs-by-qos', options)
-      .success(function(jobsByQos) {
+    var ajax_options = options;
+    ajax_options.type = "GET";
+    ajax_options.url = config.cluster.api.url + config.cluster.api.path + '/jobs-by-qos';
+    ajax_options.success = function (jobsByQos) {
         var context = {
           jobs: computeJobsForQos(jobsByQos)
         };
@@ -275,7 +280,9 @@ define([
         $('#qos').append(qosTemplate(context));
 
         bindUtils(context.jobs, options);
-      });
+    };
+
+    $.ajax(ajax_options);
   }
 
   function closeModal(e) {
@@ -285,8 +292,10 @@ define([
   }
 
   function toggleModal(jobId, options, config) {
-    $.ajax(config.cluster.api.url + config.cluster.api.path + '/job/' + jobId, options)
-      .success(function(job) {
+    var ajax_options = options;
+    ajax_options.type = "GET";
+    ajax_options.url = config.cluster.api.url + config.cluster.api.path + '/job/' + jobId;
+    ajax_options.success = function (job) {
         var context = {
           job: job
         };
@@ -295,7 +304,9 @@ define([
         $('body').append(modalTemplate(context));
         $('#modal-job').on('hidden.bs.modal', closeModal);
         $('#modal-job').modal('show');
-      });
+    };
+
+    $.ajax(ajax_options);
   }
 
   return function(config) {
